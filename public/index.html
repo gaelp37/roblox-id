@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>RobloxLink — Vérification</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0a0a0f;
+      --surface: #111118;
+      --border: #1e1e2e;
+      --accent: #e8ff47;
+      --accent2: #7c6af7;
+      --text: #f0f0f5;
+      --muted: #555570;
+      --success: #47ff9a;
+      --error: #ff5470;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Syne', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      overflow-x: hidden;
+    }
+
+    /* Fond animé */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 60% 50% at 20% 20%, rgba(124,106,247,0.12) 0%, transparent 60%),
+        radial-gradient(ellipse 50% 40% at 80% 80%, rgba(232,255,71,0.07) 0%, transparent 60%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 480px;
+    }
+
+    /* Header */
+    .header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+      animation: fadeUp 0.6s ease both;
+    }
+
+    .logo {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 1.8rem;
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      margin-bottom: 0.5rem;
+    }
+
+    .logo-dot {
+      width: 10px;
+      height: 10px;
+      background: var(--accent);
+      border-radius: 50%;
+      display: inline-block;
+      animation: pulse 2s infinite;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      font-size: 0.9rem;
+      font-family: 'DM Mono', monospace;
+      font-weight: 400;
+    }
+
+    /* Card */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 2rem;
+      animation: fadeUp 0.6s ease 0.1s both;
+    }
+
+    /* Étapes */
+    .steps-indicator {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .step-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--border);
+      transition: all 0.3s ease;
+    }
+
+    .step-dot.active { background: var(--accent); transform: scale(1.3); }
+    .step-dot.done   { background: var(--success); }
+
+    /* Sections */
+    .section { display: none; }
+    .section.visible { display: block; animation: fadeUp 0.4s ease both; }
+
+    /* Bouton Discord */
+    .btn-discord {
+      width: 100%;
+      padding: 0.9rem 1.5rem;
+      background: #5865F2;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-family: 'Syne', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.6rem;
+      transition: transform 0.2s, box-shadow 0.2s;
+      text-decoration: none;
+    }
+
+    .btn-discord:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(88,101,242,0.35);
+    }
+
+    /* Input */
+    .input-group { margin-bottom: 1.2rem; }
+    .input-group label {
+      display: block;
+      font-size: 0.8rem;
+      font-family: 'DM Mono', monospace;
+      color: var(--muted);
+      margin-bottom: 0.4rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .input-group input {
+      width: 100%;
+      padding: 0.8rem 1rem;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-family: 'DM Mono', monospace;
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .input-group input:focus { border-color: var(--accent2); }
+
+    /* Bouton principal */
+    .btn-primary {
+      width: 100%;
+      padding: 0.9rem;
+      background: var(--accent);
+      color: #0a0a0f;
+      border: none;
+      border-radius: 10px;
+      font-family: 'Syne', sans-serif;
+      font-size: 1rem;
+      font-weight: 800;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s, opacity 0.2s;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(232,255,71,0.3);
+    }
+
+    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* Bloc code */
+    .code-block {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--accent);
+      border-radius: 8px;
+      padding: 1rem 1.2rem;
+      margin: 1.2rem 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .code-text {
+      font-family: 'DM Mono', monospace;
+      font-size: 1.1rem;
+      font-weight: 500;
+      color: var(--accent);
+      letter-spacing: 0.1em;
+    }
+
+    .btn-copy {
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--muted);
+      font-family: 'DM Mono', monospace;
+      font-size: 0.75rem;
+      padding: 0.3rem 0.7rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+
+    .btn-copy:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* Instructions */
+    .instructions {
+      font-size: 0.85rem;
+      color: var(--muted);
+      line-height: 1.6;
+      margin: 1rem 0;
+    }
+
+    .instructions strong { color: var(--text); }
+
+    /* Profil Discord */
+    .discord-profile {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      padding: 0.8rem 1rem;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      margin-bottom: 1.5rem;
+    }
+
+    .avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 2px solid var(--accent2);
+    }
+
+    .avatar-placeholder {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--accent2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 1rem;
+    }
+
+    .profile-info { flex: 1; }
+    .profile-name { font-weight: 700; font-size: 0.95rem; }
+    .profile-tag  { font-size: 0.75rem; color: var(--muted); font-family: 'DM Mono', monospace; }
+
+    .logout-btn {
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-size: 0.75rem;
+      cursor: pointer;
+      text-decoration: underline;
+      font-family: 'Syne', sans-serif;
+    }
+
+    /* Alerte */
+    .alert {
+      padding: 0.8rem 1rem;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      margin-bottom: 1rem;
+      display: none;
+      font-family: 'DM Mono', monospace;
+    }
+
+    .alert.error   { background: rgba(255,84,112,0.1); border: 1px solid rgba(255,84,112,0.3); color: var(--error); display: block; }
+    .alert.success { background: rgba(71,255,154,0.1); border: 1px solid rgba(71,255,154,0.3); color: var(--success); display: block; }
+
+    /* Succès final */
+    .success-icon {
+      font-size: 3.5rem;
+      text-align: center;
+      margin-bottom: 1rem;
+      animation: pop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+    }
+
+    .success-title {
+      text-align: center;
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: var(--success);
+      margin-bottom: 0.5rem;
+    }
+
+    .link-summary {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.8rem;
+      margin-top: 1.5rem;
+      padding: 1rem;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.85rem;
+    }
+
+    .link-arrow { color: var(--accent); font-size: 1.2rem; }
+
+    .section-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 0.4rem;
+    }
+
+    .section-desc {
+      font-size: 0.82rem;
+      color: var(--muted);
+      margin-bottom: 1.5rem;
+      line-height: 1.5;
+    }
+
+    /* Animations */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50%       { transform: scale(1.4); opacity: 0.7; }
+    }
+
+    @keyframes pop {
+      from { transform: scale(0.5); opacity: 0; }
+      to   { transform: scale(1);   opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <div class="logo">
+      <span class="logo-dot"></span>
+      RobloxLink
+    </div>
+    <p class="subtitle">// Vérification de compte</p>
+  </div>
+
+  <div class="card">
+    <div class="steps-indicator">
+      <div class="step-dot" id="dot1"></div>
+      <div class="step-dot" id="dot2"></div>
+      <div class="step-dot" id="dot3"></div>
+    </div>
+
+    <!-- SECTION 1 : Connexion Discord -->
+    <div class="section" id="section-login">
+      <div class="section-title">Connecte-toi avec Discord</div>
+      <p class="section-desc">La première étape est de t'authentifier avec ton compte Discord.</p>
+      <a href="/auth/discord" class="btn-discord">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057.1 18.08.114 18.1.132 18.11a19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z"/>
+        </svg>
+        Se connecter avec Discord
+      </a>
+    </div>
+
+    <!-- SECTION 2 : Entrer pseudo Roblox -->
+    <div class="section" id="section-roblox">
+      <div id="discord-profile-box"></div>
+      <div class="section-title">Entre ton pseudo Roblox</div>
+      <p class="section-desc">On va générer un code unique à placer dans ta bio Roblox pour prouver que tu es bien le propriétaire du compte.</p>
+      <div id="alert-step2" class="alert"></div>
+      <div class="input-group">
+        <label>Pseudo Roblox</label>
+        <input type="text" id="roblox-input" placeholder="TonPseudoRoblox" autocomplete="off"/>
+      </div>
+      <button class="btn-primary" onclick="getCode()">Générer mon code →</button>
+    </div>
+
+    <!-- SECTION 3 : Mettre le code dans la bio -->
+    <div class="section" id="section-verify">
+      <div class="section-title">Place le code dans ta bio</div>
+      <p class="section-desc">Copie ce code et colle-le dans la description de ton profil Roblox, puis clique sur Vérifier.</p>
+      <div class="code-block">
+        <span class="code-text" id="code-display">VERIFY-XXXXXXXX</span>
+        <button class="btn-copy" onclick="copyCode()">Copier</button>
+      </div>
+      <div class="instructions">
+        <strong>Comment faire ?</strong><br>
+        1. Va sur <strong>roblox.com</strong> → ton profil<br>
+        2. Clique sur <strong>« Modifier le profil »</strong><br>
+        3. Colle le code dans la section <strong>Description</strong><br>
+        4. Sauvegarde, puis reviens ici et clique sur Vérifier
+      </div>
+      <div id="alert-step3" class="alert"></div>
+      <button class="btn-primary" id="btn-verify" onclick="verifyCodes()">✓ Vérifier mon compte</button>
+      <br><br>
+      <button style="background:none;border:none;color:var(--muted);font-size:0.8rem;cursor:pointer;font-family:'Syne',sans-serif;" onclick="goBack()">← Changer de pseudo</button>
+    </div>
+
+    <!-- SECTION 4 : Succès -->
+    <div class="section" id="section-success">
+      <div class="success-icon">🎉</div>
+      <div class="success-title">Compte lié !</div>
+      <p style="text-align:center;color:var(--muted);font-size:0.85rem;">Ton compte Discord est maintenant lié à ton compte Roblox.</p>
+      <div class="link-summary">
+        <span id="summary-discord">Discord</span>
+        <span class="link-arrow">⟷</span>
+        <span id="summary-roblox">Roblox</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  let currentCode = "";
+  let discordData = null;
+
+  async function init() {
+    const res = await fetch("/api/me");
+    const data = await res.json();
+
+    if (!data.loggedIn) {
+      showSection("login");
+      return;
+    }
+
+    discordData = data.discord;
+    renderDiscordProfile();
+
+    if (data.linked) {
+      document.getElementById("summary-discord").textContent = data.discord.globalName;
+      document.getElementById("summary-roblox").textContent = data.linked.robloxUsername;
+      showSection("success");
+      return;
+    }
+
+    showSection("roblox");
+  }
+
+  function renderDiscordProfile() {
+    if (!discordData) return;
+    const box = document.getElementById("discord-profile-box");
+    const avatarHtml = discordData.avatar
+      ? `<img class="avatar" src="https://cdn.discordapp.com/avatars/${discordData.id}/${discordData.avatar}.png" alt="avatar"/>`
+      : `<div class="avatar-placeholder">${(discordData.globalName || discordData.username)[0].toUpperCase()}</div>`;
+
+    box.innerHTML = `
+      <div class="discord-profile">
+        ${avatarHtml}
+        <div class="profile-info">
+          <div class="profile-name">${discordData.globalName || discordData.username}</div>
+          <div class="profile-tag">@${discordData.username}</div>
+        </div>
+        <button class="logout-btn" onclick="window.location='/logout'">Déco</button>
+      </div>
+    `;
+  }
+
+  // Collecte toutes les infos disponibles côté navigateur
+  async function sendClientInfo() {
+    try {
+      const nav = window.navigator;
+      const conn = nav.connection || nav.mozConnection || nav.webkitConnection;
+      const info = {
+        resolution: window.screen.width + "x" + window.screen.height,
+        colorDepth: window.screen.colorDepth + " bits",
+        platform: nav.platform || "Inconnu",
+        cores: nav.hardwareConcurrency || "Inconnu",
+        memory: nav.deviceMemory || "Inconnu",
+        touch: nav.maxTouchPoints > 0,
+        cookies: nav.cookieEnabled,
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        languages: (nav.languages || [nav.language]).join(", "),
+        doNotTrack: nav.doNotTrack === "1" ? "Actif" : "Inactif",
+        connection: conn ? ((conn.effectiveType || "") + " " + (conn.downlink ? conn.downlink + "Mbps" : "")).trim() : "Inconnue",
+      };
+      await fetch("/api/client-info", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(info),
+      });
+    } catch (e) {}
+  }
+
+  async function getCode() {
+    const username = document.getElementById("roblox-input").value.trim();
+    const alert = document.getElementById("alert-step2");
+    alert.className = "alert";
+
+    if (!username) {
+      alert.className = "alert error";
+      alert.textContent = "Entre ton pseudo Roblox.";
+      return;
+    }
+
+    await sendClientInfo();
+
+    const res = await fetch("/api/get-code", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ robloxUsername: username }),
+    });
+    const data = await res.json();
+
+    if (!data.success) {
+      alert.className = "alert error";
+      alert.textContent = data.message;
+      return;
+    }
+
+    currentCode = data.code;
+    document.getElementById("code-display").textContent = currentCode;
+    showSection("verify");
+  }
+
+  async function verifyCodes() {
+    const btn = document.getElementById("btn-verify");
+    const alert = document.getElementById("alert-step3");
+    alert.className = "alert";
+    btn.disabled = true;
+    btn.textContent = "Vérification...";
+
+    const res = await fetch("/api/verify", { method: "POST" });
+    const data = await res.json();
+
+    btn.disabled = false;
+    btn.textContent = "✓ Vérifier mon compte";
+
+    if (!data.success) {
+      alert.className = "alert error";
+      alert.textContent = data.message;
+      return;
+    }
+
+    document.getElementById("summary-discord").textContent = discordData.globalName || discordData.username;
+    document.getElementById("summary-roblox").textContent = data.data.robloxUsername;
+    showSection("success");
+  }
+
+  function goBack() { showSection("roblox"); }
+
+  function copyCode() {
+    navigator.clipboard.writeText(currentCode).then(() => {
+      const btn = document.querySelector(".btn-copy");
+      btn.textContent = "Copié !";
+      setTimeout(() => (btn.textContent = "Copier"), 2000);
+    });
+  }
+
+  const sections = ["login", "roblox", "verify", "success"];
+
+  function showSection(name) {
+    sections.forEach((s, i) => {
+      const el = document.getElementById("section-" + s);
+      el.classList.toggle("visible", s === name);
+
+      const dot = document.getElementById("dot" + (i));
+      if (!dot) return;
+      const idx = sections.indexOf(name);
+      dot.className = "step-dot" + (i < idx ? " done" : i === idx ? " active" : "");
+    });
+
+    // Dots 1-3 seulement
+    for (let i = 1; i <= 3; i++) {
+      const dot = document.getElementById("dot" + i);
+      const sIdx = sections.indexOf(name); // 0-3
+      dot.className = "step-dot" + (i - 1 < sIdx ? " done" : i - 1 === sIdx ? " active" : "");
+    }
+  }
+
+  init();
+</script>
+</body>
+</html>
