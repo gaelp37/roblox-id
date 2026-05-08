@@ -14,8 +14,8 @@ const PORT = process.env.PORT || 3000;
 // ─── ⚙️ CONFIG — MODIFIE CES VALEURS ─────────────────────
 const DISCORD_CLIENT_ID     = "1501658276171874352";
 const DISCORD_CLIENT_SECRET = "4MblsbmchZXnd8-0M-m-Bd6cMpPONHqS";
-const REDIRECT_URI = "https://ronblox-id-production.up.railway.app/callback/discord";
-const SESSION_SECRET        = "change_ce_secret_tres_long";
+const REDIRECT_URI = "https://roblox-id.onrender.com/callback/discord";
+const SESSION_SECRET = "mX7kP9qR2wL5nJ8vB3hF6tY1uA4sD0eC";
 // ──────────────────────────────────────────────────────────
 
 const USERS_FILE = path.join(__dirname, "users.json");
